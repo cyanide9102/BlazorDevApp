@@ -1,0 +1,68 @@
+﻿@page "/products"
+
+@using BlazorDevApp.Core.Entities
+@using BlazorDevApp.Core.Interfaces
+@using Microsoft.EntityFrameworkCore
+
+@inject IRepository<Product> _productRepository
+
+<h1>Products</h1>
+
+@if (products == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (products.Count == 0)
+{
+    <p><strong>No data found...</strong></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Price</th>
+                <th scope="col">Created On</th>
+                <th scope="col" class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in products)
+            {
+                <tr>
+                    <td>@product.Id</td>
+                    <td>@product.Name</td>
+                    <td>@($"$ {product.Price.ToString("#.##")}")</td>
+                    <td>@($"{product.CreatedOn.ToString("yyyy-MM-dd hh:mm:ss tt")}")</td>
+                    <td>
+                        <a href="edit-product/@product.Id" class="btn btn-sm btn-secondary"><span class="oi oi-cog"></span> Edit</a>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteProduct(product.Id)"><span class="oi oi-trash"></span> Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Product>? products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await _productRepository.Get().ToListAsync();
+    }
+
+    private async Task DeleteProduct(int id)
+    {
+        var product = await _productRepository.GetByIdAsync(id);
+        if (product != null)
+        {
+            await _productRepository.DeleteAsync(product);
+            await _productRepository.SaveChangesAsync();
+
+            products = await _productRepository.Get().ToListAsync();
+        }
+    }
+}
