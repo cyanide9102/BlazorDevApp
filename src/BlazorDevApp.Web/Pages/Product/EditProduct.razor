@@ -1,0 +1,85 @@
+﻿@page "/edit-product/{Id:int}"
+
+@using BlazorDevApp.Core.Entities
+@using BlazorDevApp.Core.Interfaces
+@using BlazorDevApp.Web.Models
+@using Microsoft.EntityFrameworkCore
+
+@inject NavigationManager _navigationManager
+@inject IRepository<Product> _productRepository
+
+<div class="row">
+    <div class="col-xl-6 col-lg-9">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">Edit Product</h3>
+                @if (IsValidIdParameter)
+                {
+                    <h5>@productModel.Name</h5>
+                    <EditForm Model="productModel" OnValidSubmit="@EditExistingProduct">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3">
+                            <label for="productName" class="form-label m-0 p-0">Name</label>
+                            <InputText class="form-control" id="productName" @bind-Value="productModel.Name" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="productDescription" class="form-label m-0 p-0">Description</label>
+                            <InputTextArea class="form-control" id="productDescription" @bind-Value="productModel.Description" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="productPrice" class="form-label m-0 p-0">Price</label>
+                            <InputNumber class="form-control" id="productPrice" @bind-Value="productModel.Price" />
+                        </div>
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-success float-end"><span class="oi oi-plus"></span> Update Product</button>
+                        </div>
+                    </EditForm>
+                }
+                else
+                {
+                    <p class="fw-bold text-danger m-0 p-0">Product not found!</p>
+                    <p class="m-0 p-0">
+                        <a href="products" class="text-decoration-none">Go to products page!</a>
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private bool IsValidIdParameter { get; set; } = true;
+    private ProductModel productModel = new ProductModel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var product = await _productRepository.Get().FirstOrDefaultAsync(p => p.Id == Id);
+        if (product != null)
+        {
+            productModel = new ProductModel { Name = product.Name, Description = product.Description, Price = product.Price };
+        }
+        else
+        {
+            IsValidIdParameter = false;
+        }
+    }
+
+    public async Task EditExistingProduct()
+    {
+        var product = await _productRepository.Get().FirstOrDefaultAsync(p => p.Id == Id);
+        if (product != null)
+        {
+            product.Update(productModel.Name, productModel.Description, productModel.Price);
+
+            await _productRepository.UpdateAsync(product);
+            await _productRepository.SaveChangesAsync();
+        }
+
+        _navigationManager.NavigateTo("products");
+    }
+}

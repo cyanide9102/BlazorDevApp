@@ -1,0 +1,51 @@
+﻿@page "/product/{Id:int}"
+
+@using BlazorDevApp.Core.Entities
+@using BlazorDevApp.Core.Interfaces
+@using Microsoft.EntityFrameworkCore
+
+@inject IReadRepository<Product> _productRepository
+
+<div class="text-start mb-3">
+    <a href="products" class="btn btn-primary"><span class="oi oi-list"></span> Products</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Product details</h5>
+        @if (product != null)
+        {
+            <dl class="row">
+                <dt class="col-sm-3">ID</dt>
+                <dd class="col-sm-9">@product.Id</dd>
+
+                <dt class="col-sm-3">Title</dt>
+                <dd class="col-sm-9">@product.Name</dd>
+
+                <dt class="col-sm-3">Description</dt>
+                <dd class="col-sm-9">@product.Description</dd>
+
+                <dt class="col-sm-3">ID</dt>
+                <dd class="col-sm-9">@($"${product.Price.ToString("0.00")}")</dd>
+
+                <dt class="col-sm-3">Created On</dt>
+                <dd class="col-sm-9">@product.CreatedOn.ToLocalTime().ToString("dd MMM, yyyy hh:mm tt")</dd>
+
+                <dt class="col-sm-3">Updated On</dt>
+                <dd class="col-sm-9">@(product.UpdatedOn.HasValue ? product.UpdatedOn.Value.ToLocalTime().ToString("dd MMM, yyyy hh:mm tt") : "")</dd>
+            </dl>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Product? product;
+
+    protected override async Task OnInitializedAsync()
+    {
+        product = await _productRepository.GetByIdAsync(Id);
+    }
+}

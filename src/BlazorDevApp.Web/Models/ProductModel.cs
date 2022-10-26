@@ -3,7 +3,7 @@
 #nullable disable
 
 namespace BlazorDevApp.Web.Models;
-public class AddProductModel
+public class ProductModel
 {
     [Required, StringLength(256)]
     public string Name { get; set; }

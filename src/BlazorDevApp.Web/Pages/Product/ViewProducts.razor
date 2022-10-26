@@ -12,8 +12,6 @@
     <a href="add-product" class="btn btn-primary"><span class="oi oi-plus"></span> Add new Product</a>
 </div>
 
-
-
 <table class="table table-striped">
     <thead>
         <tr>
@@ -48,9 +46,10 @@
                 <tr>
                     <td>@product.Id</td>
                     <td>@product.Name</td>
-                    <td>@($"${product.Price}")</td>
-                    <td>@($"{product.CreatedOn.ToString("dd MMM, yyyy hh:mm tt")}")</td>
+                    <td>@($"${product.Price.ToString("#.##")}")</td>
+                    <td>@($"{product.CreatedOn.ToLocalTime().ToString("dd MMM, yyyy hh:mm tt")}")</td>
                     <td class="text-end">
+                        <a href="product/@product.Id" class="btn btn-sm btn-primary"><span class="oi oi-info"></span> View</a>
                         <a href="edit-product/@product.Id" class="btn btn-sm btn-secondary"><span class="oi oi-cog"></span> Edit</a>
                         <button class="btn btn-sm btn-danger" @onclick="() => DeleteProduct(product.Id)"><span class="oi oi-trash"></span> Delete</button>
                     </td>
