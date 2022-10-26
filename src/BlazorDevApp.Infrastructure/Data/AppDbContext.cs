@@ -1,4 +1,6 @@
-﻿using BlazorDevApp.Core.Entities;
+﻿using System.Reflection;
+
+using BlazorDevApp.Core.Entities;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -11,8 +13,9 @@ public class AppDbContext : DbContext
 
     public DbSet<Product> Products => Set<Product>();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(builder);
+        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }

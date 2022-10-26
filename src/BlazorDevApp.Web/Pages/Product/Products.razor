@@ -8,43 +8,57 @@
 
 <h1>Products</h1>
 
-@if (products == null)
-{
-    <p><em>Loading...</em></p>
-}
-else if (products.Count == 0)
-{
-    <p><strong>No data found...</strong></p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
+<div class="text-end mb-3">
+    <a href="add-product" class="btn btn-primary"><span class="oi oi-plus"></span> Add new Product</a>
+</div>
+
+
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Price</th>
+            <th scope="col">Created On</th>
+            <th scope="col" class="text-end">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (products == null)
+        {
             <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Name</th>
-                <th scope="col">Price</th>
-                <th scope="col">Created On</th>
-                <th scope="col" class="text-end">Actions</th>
+                <td colspan="5" class="text-center">
+                    <p><em>Loading...</em></p>
+                </td>
             </tr>
-        </thead>
-        <tbody>
+        }
+        else if (products.Count == 0)
+        {
+            <tr>
+                <td colspan="5" class="text-center">
+                    <p><strong>No product found!</strong></p>
+                </td>
+            </tr>
+        }
+        else
+        {
             @foreach (var product in products)
             {
                 <tr>
                     <td>@product.Id</td>
                     <td>@product.Name</td>
-                    <td>@($"$ {product.Price.ToString("#.##")}")</td>
-                    <td>@($"{product.CreatedOn.ToString("yyyy-MM-dd hh:mm:ss tt")}")</td>
-                    <td>
+                    <td>@($"${product.Price}")</td>
+                    <td>@($"{product.CreatedOn.ToString("dd MMM, yyyy hh:mm tt")}")</td>
+                    <td class="text-end">
                         <a href="edit-product/@product.Id" class="btn btn-sm btn-secondary"><span class="oi oi-cog"></span> Edit</a>
                         <button class="btn btn-sm btn-danger" @onclick="() => DeleteProduct(product.Id)"><span class="oi oi-trash"></span> Delete</button>
                     </td>
                 </tr>
             }
-        </tbody>
-    </table>
-}
+        }
+    </tbody>
+</table>
 
 @code {
     private List<Product>? products;
