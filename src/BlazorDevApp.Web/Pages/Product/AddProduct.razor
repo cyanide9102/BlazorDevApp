@@ -1,0 +1,39 @@
+﻿@page "/add-product"
+
+@using BlazorDevApp.Core.Entities
+@using BlazorDevApp.Core.Interfaces
+@using BlazorDevApp.Web.Models
+
+@inject IRepository<Product> _productRepository
+
+<h1>Add new Product</h1>
+
+<EditForm Model="productModel" OnValidSubmit="@AddNewProduct">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="productName" class="form-label">Name</label>
+        <InputText class="form-control" id="productName" @bind-Value="productModel.Name" />
+    </div>
+    <div class="mb-3">
+        <label for="productDescription" class="form-label">Description</label>
+        <InputTextArea class="form-control" id="productDescription" @bind-Value="productModel.Description" />
+    </div>
+    <div class="mb-3">
+        <label for="productPrice" class="form-label">Price</label>
+        <InputNumber class="form-control" id="productPrice" @bind-Value="productModel.Price" />
+    </div>
+    <div class="mb-3">
+        <button type="submit" class="btn btn-success float-end"><span class="oi oi-plus"></span> Add new Product</button>
+    </div>
+</EditForm>
+
+@code {
+    private AddProductModel productModel = new AddProductModel();
+
+    public async Task AddNewProduct()
+    {
+
+    }
+}
