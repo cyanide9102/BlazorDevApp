@@ -4,7 +4,12 @@
 @using BlazorDevApp.Core.Interfaces
 @using Microsoft.EntityFrameworkCore
 
+@implements IAsyncDisposable
+
+@inject IJSRuntime _jsRuntime
 @inject IRepository<Product> _productRepository
+
+<PageTitle>Products</PageTitle>
 
 <h1>Products</h1>
 
@@ -12,41 +17,37 @@
     <a href="add-product" class="btn btn-primary"><span class="oi oi-plus"></span> Add new Product</a>
 </div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Name</th>
-            <th scope="col">Price</th>
-            <th scope="col">Created On</th>
-            <th scope="col" class="text-end">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (products == null)
-        {
+@if (products == null)
+{
+    <div class="text-center">
+        <Loader />
+    </div>
+}
+else if (products.Count == 0)
+{
+    <div class="text-center">
+        <p><strong>No product found!</strong></p>
+    </div>
+}
+else
+{
+    <table id="productsTable" class="table table-striped">
+        <thead>
             <tr>
-                <td colspan="5" class="text-center">
-                    <p><em>Loading...</em></p>
-                </td>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Price</th>
+                <th scope="col">Created On</th>
+                <th scope="col" class="text-end">Actions</th>
             </tr>
-        }
-        else if (products.Count == 0)
-        {
-            <tr>
-                <td colspan="5" class="text-center">
-                    <p><strong>No product found!</strong></p>
-                </td>
-            </tr>
-        }
-        else
-        {
+        </thead>
+        <tbody>
             @foreach (var product in products)
             {
                 <tr>
                     <td>@product.Id</td>
                     <td>@product.Name</td>
-                    <td>@($"${product.Price.ToString("#.##")}")</td>
+                    <td>@($"${product.Price.ToString("0.00")}")</td>
                     <td>@($"{product.CreatedOn.ToLocalTime().ToString("dd MMM, yyyy hh:mm tt")}")</td>
                     <td class="text-end">
                         <a href="product/@product.Id" class="btn btn-sm btn-primary"><span class="oi oi-info"></span> View</a>
@@ -55,9 +56,9 @@
                     </td>
                 </tr>
             }
-        }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+}
 
 @code {
     private List<Product>? products;
@@ -65,6 +66,11 @@
     protected override async Task OnInitializedAsync()
     {
         products = await _productRepository.Get().ToListAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await _jsRuntime.InvokeAsync<object>("initProductsDataTable");
     }
 
     private async Task DeleteProduct(int id)
@@ -77,5 +83,10 @@
 
             products = await _productRepository.Get().ToListAsync();
         }
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        await _jsRuntime.InvokeAsync<object>("destroyProductsDataTable");
     }
 }

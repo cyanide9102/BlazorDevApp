@@ -10,8 +10,8 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(buil
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddTransient(typeof(IRepository<>), typeof(EfRepository<>));
-builder.Services.AddTransient(typeof(IReadRepository<>), typeof(EfRepository<>));
+builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+builder.Services.AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>));
 
 var app = builder.Build();
 
