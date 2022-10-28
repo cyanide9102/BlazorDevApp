@@ -7,7 +7,6 @@
 @implements IAsyncDisposable
 
 @inject IJSRuntime _jsRuntime
-@inject IRepository<Product> _productRepository
 
 <PageTitle>Products</PageTitle>
 
@@ -17,76 +16,33 @@
     <a href="add-product" class="btn btn-primary"><span class="oi oi-plus"></span> Add new Product</a>
 </div>
 
-@if (products == null)
-{
-    <div class="text-center">
-        <Loader />
-    </div>
-}
-else if (products.Count == 0)
-{
-    <div class="text-center">
-        <p><strong>No product found!</strong></p>
-    </div>
-}
-else
-{
-    <table id="productsTable" class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Name</th>
-                <th scope="col">Price</th>
-                <th scope="col">Created On</th>
-                <th scope="col" class="text-end">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var product in products)
-            {
-                <tr>
-                    <td>@product.Id</td>
-                    <td>@product.Name</td>
-                    <td>@($"${product.Price.ToString("0.00")}")</td>
-                    <td>@($"{product.CreatedOn.ToLocalTime().ToString("dd MMM, yyyy hh:mm tt")}")</td>
-                    <td class="text-end">
-                        <a href="product/@product.Id" class="btn btn-sm btn-primary"><span class="oi oi-info"></span> View</a>
-                        <a href="edit-product/@product.Id" class="btn btn-sm btn-secondary"><span class="oi oi-cog"></span> Edit</a>
-                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteProduct(product.Id)"><span class="oi oi-trash"></span> Delete</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+<table id="productsTable" class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Price</th>
+            <th scope="col">Created On</th>
+            <th scope="col" class="text-end">Actions</th>
+        </tr>
+    </thead>
+</table>
 
 @code {
-    private List<Product>? products;
-
-    protected override async Task OnInitializedAsync()
-    {
-        products = await _productRepository.Get().ToListAsync();
-    }
+    private IJSObjectReference script;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await _jsRuntime.InvokeAsync<object>("initProductsDataTable");
-    }
-
-    private async Task DeleteProduct(int id)
-    {
-        var product = await _productRepository.GetByIdAsync(id);
-        if (product != null)
-        {
-            await _productRepository.DeleteAsync(product);
-            await _productRepository.SaveChangesAsync();
-
-            products = await _productRepository.Get().ToListAsync();
-        }
+        script = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "./Pages/Product/ViewProducts.razor.js");
+        await script.InvokeVoidAsync("initProductsDataTable");
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        await _jsRuntime.InvokeAsync<object>("destroyProductsDataTable");
+        if (script != null)
+        {
+            await script.InvokeVoidAsync("destroyProductsDataTable");
+            await script.DisposeAsync();
+        }
     }
 }
